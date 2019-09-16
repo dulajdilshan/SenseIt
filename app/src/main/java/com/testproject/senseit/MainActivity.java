@@ -31,7 +31,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private TextView textY;
     private TextView textZ;
 
-    private float movementThreshold = 0.5f;
+    private float movementThreshold = 0.1f;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
