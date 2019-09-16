@@ -1,18 +1,37 @@
 package com.testproject.senseit;
 
+import android.content.Context;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.os.Bundle;
-
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
-import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.TextView;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements SensorEventListener {
+
+    private SensorManager sensorManager;
+    private Sensor accelerometer;
+    private float deltaX = 0;
+    private float deltaY = 0;
+    private float deltaZ = 0;
+
+    private float lastX = 0;
+    private float lastY = 0;
+    private float lastZ = 0;
+
+    private TextView textX;
+    private TextView textY;
+    private TextView textZ;
+
+    private float movementThreshold = 0.5f;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -21,14 +40,22 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
+        sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        textX = findViewById(R.id.txt_x);
+        textY = findViewById(R.id.txt_y);
+        textZ = findViewById(R.id.txt_z);
+
+        if (sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null) {
+            // success! we have an accelerometer
+
+            accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+            //sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+            System.out.println("initialized");
+
+        } else {
+            // fail we don't have an accelerometer!
+            System.out.println("init failed");
+        }
     }
 
     @Override
@@ -51,5 +78,48 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onSensorChanged(SensorEvent sensorEvent) {
+
+        deltaX = Math.abs(lastX - sensorEvent.values[0]);
+        deltaY = Math.abs(lastY - sensorEvent.values[1]);
+        deltaZ = Math.abs(lastZ - sensorEvent.values[2]);
+
+        // if the change is below 1, it is just plain noise
+        if (deltaX < movementThreshold)
+            deltaX = 0;
+        if (deltaY < movementThreshold)
+            deltaY = 0;
+        if (deltaZ < movementThreshold)
+            deltaZ = 0;
+
+
+        // set the last know values of x,y,z
+        lastX = sensorEvent.values[0];
+        lastY = sensorEvent.values[1];
+        lastZ = sensorEvent.values[2];
+
+
+        textX.setText(Float.toString(deltaX));
+        textY.setText(Float.toString(deltaY));
+        textZ.setText(Float.toString(deltaZ));
+
+    }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int i) {
+        System.out.println("accuracy changed");
+    }
+
+    public void onClickStart(View view){
+        System.out.println("starting");
+        sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+    }
+
+    public void onClickStop(View view){
+        System.out.println("stopping");
+        sensorManager.unregisterListener(this);
     }
 }
