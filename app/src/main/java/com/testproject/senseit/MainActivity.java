@@ -15,6 +15,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
+import java.text.DecimalFormat;
+
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
 
     private SensorManager sensorManager;
@@ -32,6 +34,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private TextView textZ;
 
     private float movementThreshold = 0.1f;
+
+    DecimalFormat df = new DecimalFormat("###.###");
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -105,6 +109,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         textX.setText(Float.toString(deltaX));
         textY.setText(Float.toString(deltaY));
         textZ.setText(Float.toString(deltaZ));
+
+//        textX.setText(df.format(lastX));
+//        textY.setText(df.format(lastY));
+//        textZ.setText(df.format(lastZ));
 
     }
 
